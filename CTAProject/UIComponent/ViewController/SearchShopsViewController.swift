@@ -10,15 +10,15 @@ import SnapKit
 
 final class SearchShopsViewController: UIViewController {
     
-    var tableView: UITableView = {
-        var tableView = UITableView()
+    private let tableView: UITableView = {
+        let tableView = UITableView()
         tableView.backgroundColor = .systemGray6
         tableView.register(SearchShopsTableViewCell.self, forCellReuseIdentifier: SearchShopsTableViewCell.reuseIdentifier)
         return tableView
     }()
     
-    var searchBar: UISearchBar = {
-        var searchBar = UISearchBar()
+    private let searchBar: UISearchBar = {
+        let searchBar = UISearchBar()
         searchBar.placeholder = "キーワード"
         return searchBar
     }()
@@ -55,14 +55,14 @@ extension SearchShopsViewController: UITableViewDelegate, UITableViewDataSource 
 
 //MARK: UI Configuration
 extension SearchShopsViewController {
-    func setupView() {
+    private func setupView() {
         view.backgroundColor = .white
         view.addSubview(tableView)
         view.addSubview(searchBar)
         navigationItem.title = "グルスポ"
     }
     
-    func setDelegates() {
+    private func setDelegates() {
         tableView.delegate = self
         tableView.dataSource = self
     }
