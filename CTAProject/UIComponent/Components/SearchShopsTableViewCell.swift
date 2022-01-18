@@ -8,33 +8,40 @@
 import UIKit
 import SnapKit
 
-class SearchShopsTableViewCell: UITableViewCell {
-    var shopImageView: UIImageView = {
+final class SearchShopsTableViewCell: UITableViewCell {
+    private let shopImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         return imageView
     }()
     
-    var shopNameLabel: UILabel = {
+    private let shopNameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 24)
+        label.adjustsFontSizeToFitWidth = true
+        label.numberOfLines = 2
+        label.minimumScaleFactor = 0.75
         return label
     }()
     
-    var priceLabel: UILabel = {
+    private let priceLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 24)
+        label.font = UIFont.systemFont(ofSize: 20)
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.75
         return label
     }()
     
-    var locationLabel: UILabel = {
+    private let locationLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 24)
+        label.font = UIFont.systemFont(ofSize: 20)
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.75
         return label
     }()
     
-    var labelStackView: UIStackView = {
+    private let labelStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.distribution = .equalSpacing
@@ -42,7 +49,7 @@ class SearchShopsTableViewCell: UITableViewCell {
         return stackView
     }()
     
-    var containerStackView: UIStackView = {
+    private let containerStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.distribution = .equalSpacing
@@ -71,7 +78,7 @@ class SearchShopsTableViewCell: UITableViewCell {
 
 //MARK: Static Methods
 extension SearchShopsTableViewCell {
-    static var reuseIdentifier = "cell"
+    static let reuseIdentifier = "cell"
 }
 
 //MARK: UI Configuration
