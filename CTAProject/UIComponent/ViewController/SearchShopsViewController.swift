@@ -19,7 +19,7 @@ final class SearchShopsViewController: UIViewController {
     
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "キーワード"
+        searchBar.placeholder = L10n.searchShopsSearchBarPlaceholder
         return searchBar
     }()
 
@@ -59,7 +59,7 @@ extension SearchShopsViewController {
         view.backgroundColor = .white
         view.addSubview(tableView)
         view.addSubview(searchBar)
-        navigationItem.title = "グルスポ"
+        navigationItem.title = L10n.searchShopsNavigationBarTitle
     }
     
     private func setDelegates() {
