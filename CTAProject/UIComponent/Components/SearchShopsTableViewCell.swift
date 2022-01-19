@@ -76,11 +76,6 @@ final class SearchShopsTableViewCell: UITableViewCell {
     }
 }
 
-//MARK: Static Methods
-extension SearchShopsTableViewCell {
-    static let reuseIdentifier = "cell"
-}
-
 //MARK: UI Configuration
 extension SearchShopsTableViewCell {
     private func setupView() {
