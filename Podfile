@@ -10,14 +10,19 @@ target 'CTAProject' do
   pod 'SwiftGen'
   pod 'Unio'
 	pod 'SnapKit', '~> 5.0.0'
+	pod 'RxSwift'
+	pod 'RxCocoa'
+	pod 'Moya'
+	pod 'Moya/RxSwift'
+
 
   target 'CTAProjectTests' do
     inherit! :search_paths
-    # Pods for testing
+		pod 'RxTest'
+		pod 'RxBlocking'
   end
 
   target 'CTAProjectUITests' do
-    # Pods for testing
   end
 
 end
