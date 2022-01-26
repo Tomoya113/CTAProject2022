@@ -13,28 +13,18 @@ import Foundation
 
 class HotPepperAPIModelTests: XCTestCase {
     
-    func testSearchShopsModel() throws {
+    func test_SearchShopsModel() throws {
         let decode = JSONDecoder()
         decode.keyDecodingStrategy = .convertFromSnakeCase
-        do {
-            let response = try decode.decode(HotPepperAPI.Response<HotPepperAPI.SearchShopsModel>.self, from: HotPepperAPI.SearchShopsModel.exampleJSON.data(using: .utf8)!)
-            XCTAssertEqual(response.results.shop[0].name, "もつ鍋 焼き肉 岩見 西新店")
-        } catch let error {
-            XCTFail("error \(error)")
-        }
+        XCTAssertNoThrow(try decode.decode(HotPepperAPI.Response<HotPepperAPI.SearchShopsModel>.self, from: HotPepperAPI.SearchShopsModel.exampleJSON.data(using: .utf8)!))
         
     }
     
-    func testErrorModel() throws {
+    func test_ErrorModel() throws {
         let decode = JSONDecoder()
         decode.keyDecodingStrategy = .convertFromSnakeCase
-        do {
-            let response = try decode.decode(HotPepperAPI.Response<HotPepperAPI.ErrorModel>.self, from: HotPepperAPI.ErrorModel.exampleJSON.data(using: .utf8)!)
-            XCTAssertEqual(response.results.error[0].message, "少なくとも１つの条件を入れてください。")
-            XCTAssertEqual(response.results.error[0].code, 3000)
-        } catch let error {
-            XCTFail("error \(error)")
-        }
+        XCTAssertNoThrow(try decode.decode(HotPepperAPI.Response<HotPepperAPI.ErrorModel>.self, from: HotPepperAPI.ErrorModel.exampleJSON.data(using: .utf8)!))
     }
     
 }
+
