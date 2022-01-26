@@ -7,8 +7,9 @@
 
 import Foundation
 
-enum APIResult<T, E> {
+enum APIResult<T: Decodable, E: Decodable> {
     case success(T)
-    case error(E)
+    //NOTE: APIからエラーのレスポンスが帰ってきた時(200...299)以外
+    case apiError(E)
 }
 
