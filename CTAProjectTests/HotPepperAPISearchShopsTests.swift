@@ -24,7 +24,7 @@ class HotPepperAPISearchShopsTests: XCTestCase {
             return Self.generateEndpointClosure(
                 target: target,
                 sampleResponse: .response(
-                    Self.httpURLResponse(target: target, statusCode: 3000),
+                    Self.httpURLResponse(target: target, statusCode: 200),
                     SearchShops.exampleJSON.data(using: .utf8)!
                 )
             )
@@ -46,7 +46,7 @@ class HotPepperAPISearchShopsTests: XCTestCase {
             .disposed(by: disposeBag)
     }
     
-    func test_APIResponseError() {
+    func test_APIResponseIsNot2XX() {
         let endpointClosure = { (target: MultiTarget) -> Endpoint in
             return Self.generateEndpointClosure(
                 target: target,
@@ -62,7 +62,7 @@ class HotPepperAPISearchShopsTests: XCTestCase {
             .send(provider: stubbingProvider, targetType).subscribe(
                 onSuccess: { result in
                     switch result {
-                    case .apiError(let response):
+                    case .statusCodeIsNot2XX(let response):
                         XCTAssertEqual(response.results.error[0].code, 3000)
                         XCTAssertEqual(response.results.error[0].message, "少なくとも１つの条件を入れてください。")
                     default:
@@ -85,33 +85,15 @@ class HotPepperAPISearchShopsTests: XCTestCase {
         APIClient.shared
             .send(provider: stubbingProvider, targetType).subscribe(
                 onSuccess: { result in
-                    XCTFail()
+                    switch result {
+                    case .moyaError(let moyaError):
+                        XCTAssertEqual(moyaError.localizedDescription, "操作を完了できませんでした。（networkErrorエラー300）")
+                    default:
+                        XCTFail()
+                    }
                 },
                 onFailure: { error in
-                    XCTAssertNoThrow(error as! MoyaError)
-                }).disposed(by: disposeBag)
-    }
-    
-    func test_APIResponseUnexpectedError() {
-        let endpointClosure = { (target: MultiTarget) -> Endpoint in
-            return Self.generateEndpointClosure(
-                target: target,
-                sampleResponse: .response(
-                    Self.httpURLResponse(target: target, statusCode: 3000),
-                    "data".data(using: .utf8)!
-                )
-            )
-        }
-        
-        let stubbingProvider = MoyaProvider<MultiTarget>(endpointClosure: endpointClosure, stubClosure: MoyaProvider.immediatelyStub)
-        
-        APIClient.shared
-            .send(provider: stubbingProvider, targetType).subscribe(
-                onSuccess: { result in
                     XCTFail()
-                },
-                onFailure: { error in
-                    XCTAssertNoThrow(error as! UnexpectedError)
                 }).disposed(by: disposeBag)
     }
 }
@@ -132,7 +114,7 @@ extension HotPepperAPISearchShopsTests {
     static func httpURLResponse(target: MultiTarget, statusCode: Int) -> HTTPURLResponse {
         return HTTPURLResponse(
             url: URL(target: target),
-            statusCode: 3000,
+            statusCode: statusCode,
             httpVersion: nil,
             headerFields: nil
         )!
