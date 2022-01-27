@@ -17,29 +17,28 @@ protocol APIClientProtocol {
 final class APIClient: APIClientProtocol {
     static let shared = APIClient()
     private let provider = MoyaProvider<MultiTarget>()
+    private init() {}
     
     func send<Request: BaseTargetType>(provider: MoyaProvider<MultiTarget> = MoyaProvider<MultiTarget>(),_ request: Request) -> Single<APIResult<Request.Response, Request.ErrorResponse>> {
         return provider.rx.request(MultiTarget(request))
-            .flatMap { (result) -> Single<APIResult<Request.Response, Request.ErrorResponse>> in
+            .map { result in
                 guard (200...299).contains(result.statusCode) else {
-                    do {
-                        let apiError = try result.map(Request.ErrorResponse.self)
-                        return .just(.apiError(apiError))
-                    } catch {
-                        return .error(UnexpectedError())
-                    }
+                    let apiError = try result.map(Request.ErrorResponse.self)
+                    return .statusCodeIsNot2XX(apiError)
                 }
-                do {
-                    let response = try result.map(Request.Response.self, using: APIClient.decoder)
-                    return .just(.success(response))
-                } catch {
-                    return .error(UnexpectedError())
+                let response = try result.map(Request.Response.self, using: APIClient.decoder)
+                return .success(response)
+            }
+            .catch { (error) -> Single<APIResult<Request.Response, Request.ErrorResponse>> in
+                guard let moyaError = error as? MoyaError else {
+                    return .just(.unexpectedError(UnexpectedError()))
                 }
+                return .just(.moyaError(moyaError))
             }
     }
 }
 
-
+//MARK: Decoder
 extension APIClient {
     static var decoder: JSONDecoder {
         let decoder = JSONDecoder()
