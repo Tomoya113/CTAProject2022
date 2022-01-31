@@ -16,7 +16,7 @@ final class SearchShopsViewController: UIViewController {
         tableView.register(SearchShopsTableViewCell.self, forCellReuseIdentifier: SearchShopsTableViewCell.reuseIdentifier)
         return tableView
     }()
-    
+
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = L10n.searchShopsSearchBarPlaceholder
@@ -28,7 +28,7 @@ final class SearchShopsViewController: UIViewController {
         setupView()
         setDelegates()
     }
-    
+
     //NOTE: navigationBarを参照する必要があるので、viewDidAppearでAutoLayoutの設定を呼んでいます
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -39,13 +39,13 @@ final class SearchShopsViewController: UIViewController {
 
 //MARK: Constants
 extension SearchShopsViewController {
-    struct Const {
-        struct SearchBar {
+    enum Const {
+        enum SearchBar {
             static let height = 64
             static let maxWordCount = 50
         }
         
-        struct TableViewCell {
+        enum TableViewCell {
             static let height: CGFloat = 192
         }
     }
