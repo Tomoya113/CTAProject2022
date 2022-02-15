@@ -16,25 +16,39 @@ final class SearchShopsViewController: UIViewController {
         tableView.register(SearchShopsTableViewCell.self, forCellReuseIdentifier: SearchShopsTableViewCell.reuseIdentifier)
         return tableView
     }()
-    
+
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = L10n.searchShopsSearchBarPlaceholder
         return searchBar
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setDelegates()
     }
-  
+
     //NOTE: navigationBarを参照する必要があるので、viewDidAppearでAutoLayoutの設定を呼んでいます
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         makeConstraints()
     }
     
+}
+
+//MARK: Constants
+extension SearchShopsViewController {
+    enum Const {
+        enum SearchBar {
+            static let height = 64
+            static let maxWordCount = 50
+        }
+        
+        enum TableViewCell {
+            static let height: CGFloat = 192
+        }
+    }
 }
 
 //MARK: TableView Configuration
@@ -49,8 +63,27 @@ extension SearchShopsViewController: UITableViewDelegate, UITableViewDataSource 
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 192
+        return Const.TableViewCell.height
     }
+}
+
+//MARK: SearchBar Configuration
+extension SearchShopsViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        guard let searchBarText = searchBar.text else {
+            return
+        }
+        
+        guard searchBarText.count <= Const.SearchBar.maxWordCount else {
+            view.addSubview(SearchShopsAlertModal())
+            searchBar.text = ""
+            return
+        }
+        
+        //TODO: 店の情報を取得する
+    }
+    
 }
 
 //MARK: UI Configuration
@@ -65,6 +98,7 @@ extension SearchShopsViewController {
     private func setDelegates() {
         tableView.delegate = self
         tableView.dataSource = self
+        searchBar.delegate = self
     }
 }
 
@@ -73,7 +107,7 @@ extension SearchShopsViewController {
     private func makeConstraints() {
         searchBar.snp.makeConstraints { make in
             make.width.equalTo(view)
-            make.height.equalTo(64)
+            make.height.equalTo(Const.SearchBar.height)
             if let navigationBar = navigationController?.navigationBar {
                 make.top.equalTo(navigationBar.snp.bottom)
             } else {
