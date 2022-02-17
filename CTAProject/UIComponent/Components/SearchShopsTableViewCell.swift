@@ -5,8 +5,9 @@
 //  Created by Tomoya Tanaka on 2022/01/18.
 //
 
-import UIKit
+import Nuke
 import SnapKit
+import UIKit
 
 final class SearchShopsTableViewCell: UITableViewCell {
     private let shopImageView: UIImageView = {
@@ -52,18 +53,14 @@ final class SearchShopsTableViewCell: UITableViewCell {
     private let containerStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
-        stackView.distribution = .equalSpacing
         stackView.spacing = 8
+        stackView.alignment = .leading
         return stackView
     }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupView()
-        shopNameLabel.text = "テキストテキストテキストテキストテキスト"
-        priceLabel.text = "テキストテキストテキストテキストテキスト"
-        locationLabel.text = "テキストテキストテキストテキストテキスト"
-        shopImageView.image = UIImage(systemName: "bag")
     }
 
     override func layoutSubviews() {
@@ -86,17 +83,30 @@ extension SearchShopsTableViewCell {
         containerStackView.addArrangedSubview(shopImageView)
         containerStackView.addArrangedSubview(labelStackView)
     }
+
+    func configureCell(
+        shopName: String,
+        locationName: String,
+        price: String,
+        shopImageURL: String
+    ) {
+        shopNameLabel.text = shopName
+        locationLabel.text = locationName
+        priceLabel.text = price
+        Nuke.loadImage(with: shopImageURL, into: shopImageView)
+    }
 }
 
 //MARK: AutoLayout Configuration
 extension SearchShopsTableViewCell {
     private func makeConstraints() {
         containerStackView.snp.makeConstraints { make in
-            make.edges.equalTo(self).inset(UIEdgeInsets(top: 24, left: 24, bottom: 24, right: 24))
+            make.edges.equalTo(snp.edges).inset(UIEdgeInsets(top: 24, left: 24, bottom: 24, right: 24))
+            make.center.equalTo(snp.center)
         }
         shopImageView.snp.makeConstraints { make in
-            make.width.equalTo(150)
-            make.height.equalTo(150)
+            make.width.equalTo(144)
+            make.height.equalTo(144)
         }
     }
 }
