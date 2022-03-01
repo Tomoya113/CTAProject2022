@@ -10,31 +10,20 @@ import RxSwift
 
 /// @mockable
 protocol SearchShopsModelType: SearchShops {
-    func fetchShops(keyword: String) -> Observable<Shops>
+    func fetchShops(keyword: String) -> Single<Shops>
 }
 
 final class SearchShopsModel: SearchShopsModelType {
 
-    var provider: MoyaProvider<MultiTarget>
+    let searchShopsRepository: SearchShopsRepositoryType
 
     init(
-        provider: MoyaProvider<MultiTarget> = MoyaProvider<MultiTarget>()
+        searchShopsRepository: SearchShopsRepositoryType
     ) {
-        self.provider = provider
+        self.searchShopsRepository = searchShopsRepository
     }
 
-    func fetchShops(keyword: String) -> Observable<Shops> {
-        let targetType = HotPepperAPI.Request.SearchShops(keyword: keyword)
-        return APIClient.shared
-            .send(provider: provider, targetType)
-            .asObservable()
-            .flatMap { result -> Observable<Shops> in
-                switch result {
-                case .success(let response):
-                    return .just(response.results.shop)
-                default:
-                    return .empty()
-                }
-            }
+    func fetchShops(keyword: String) -> Single<Shops> {
+        return searchShopsRepository.fetchShops(keyword: keyword)
     }
 }
