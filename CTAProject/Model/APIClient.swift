@@ -16,7 +16,6 @@ protocol APIClientProtocol {
 
 final class APIClient: APIClientProtocol {
     static let shared = APIClient()
-    private let provider = MoyaProvider<MultiTarget>()
     private init() {}
     
     func send<Request: BaseTargetType>(provider: MoyaProvider<MultiTarget> = MoyaProvider<MultiTarget>(),_ request: Request) -> Single<APIResult<Request.Response, Request.ErrorResponse>> {
