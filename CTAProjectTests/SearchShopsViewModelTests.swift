@@ -14,53 +14,54 @@ import XCTest
 
 class SearchShopsViewModelTests: XCTestCase {
 
-    func test_normalUseCase() throws {
+    func test_searchWordInputSuccess() throws {
         let dependency = Dependency()
 
         dependency.searchShopsModelMock.fetchShopsHandler = { keyword in
-            return Observable.of(Self.expectedData)
+            return Single.just(Self.expectedData)
         }
 
-        let keywordEvent = dependency.testScheduler.createHotObservable([
-            Recorded.next(10, "keyword")
-        ]).asObservable()
+        let shops = WatchStream(dependency.testTarget.outputs.shops.asObservable())
+        let loading = WatchStream(dependency.testTarget.outputs.loading.asObservable())
 
-        let shopsObserver = dependency.testScheduler.createObserver(Shops.self)
-        let loadingObserver = dependency.testScheduler.createObserver(Bool.self)
-
-        keywordEvent
-            .bind(to: dependency.testTarget.keyword)
-            .disposed(by: dependency.disposeBag)
-
-        dependency.testTarget.outputs.shops
-            .asObservable()
-            .bind(to: shopsObserver)
-            .disposed(by: dependency.disposeBag)
-
-        dependency.testTarget.outputs.loading
-            .asObservable()
-            .bind(to: loadingObserver)
-            .disposed(by: dependency.disposeBag)
-
+        dependency.testTarget.inputs.searchWord.onNext("searchQuery")
         dependency.testScheduler.start()
 
-        let shopResult = shopsObserver.events.map { $0.value.element }
-        let loadingResult = loadingObserver.events.map { $0.value.element }
+        let shopResult = shops.observer.events.map { $0.value.element }
+        let loadingResult = loading.observer.events.map { $0.value.element }
 
         XCTAssertEqual(shopResult[shopResult.count - 1]?.count, Self.expectedData.count)
+        XCTAssertEqual(shopResult.last??.count, Self.expectedData.count)
         XCTAssertEqual(loadingResult, [true, false])
+    }
+
+    func test_searchWordInputFailure() throws {
+        let dependency = Dependency()
+
+        let shops = WatchStream(dependency.testTarget.outputs.shops.asObservable())
+        let loading = WatchStream(dependency.testTarget.outputs.loading.asObservable())
+        let hasSearchWordCountExceededError = WatchStream(dependency.testTarget.outputs.hasSearchWordCountExceededError.asObservable())
+
+        dependency.testTarget.inputs.searchWord.onNext(SearchShopsViewModelTests.invalidSearchWord)
+        dependency.testScheduler.start()
+
+        let shopResult = shops.observer.events.map { $0.value.element }
+        let loadingResult = loading.observer.events.map { $0.value.element }
+        let hasSearchWordCountExceededErrorResult = hasSearchWordCountExceededError.observer.events.map { $0.value.element }
+
+        XCTAssertEqual(shopResult.count, 1)
+        XCTAssertTrue(loadingResult.isEmpty)
+        XCTAssertEqual(hasSearchWordCountExceededErrorResult, [true])
     }
 }
 
 extension SearchShopsViewModelTests {
     struct Dependency {
-        let disposeBag: DisposeBag
         let testScheduler: TestScheduler
         let testTarget: SearchShopsViewModel
         let searchShopsModelMock: SearchShopsModelTypeMock
 
         init() {
-            disposeBag = DisposeBag()
             testScheduler = TestScheduler(initialClock: 0)
             searchShopsModelMock = SearchShopsModelTypeMock()
             testTarget = SearchShopsViewModel(model: searchShopsModelMock)
@@ -70,6 +71,7 @@ extension SearchShopsViewModelTests {
 
 extension SearchShopsViewModelTests: SearchShops {
     typealias Budget = HotPepperAPI.Budget
+    static var invalidSearchWord = "テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト"
     static var expectedData: Shops {
         return [
             Shop(
@@ -77,18 +79,6 @@ extension SearchShopsViewModelTests: SearchShops {
                 name: "もつ鍋 焼き肉 岩見 西新店",
                 budget: Budget(name: "3001～4000円"),
                 logoImage: "https://imgfp.hotp.jp/IMGH/93/76/P035429376/P035429376_69.jpg"
-            ),
-            Shop(
-                stationName: "別府",
-                name: "焼き肉 凡",
-                budget: Budget(name: "3001～4000円"),
-                logoImage: "https://imgfp.hotp.jp/IMGH/80/69/P038308069/P038308069_69.jpg"
-            ),
-            Shop(
-                stationName: "鹿児島中央駅前",
-                name: "松坂 焼き肉",
-                budget: Budget(name: "5001～7000円"),
-                logoImage: "https://imgfp.hotp.jp/IMGH/48/29/P027814829/P027814829_69.jpg"
             ),
         ]
     }
