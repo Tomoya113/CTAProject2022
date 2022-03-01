@@ -15,14 +15,7 @@ import UIKit
 final class SearchShopsViewController: UIViewController {
 
     private let disposeBag = DisposeBag()
-
-    private let viewModel: SearchShopsViewModel = {
-        let provider = MoyaProvider<MultiTarget>()
-        let viewModel = SearchShopsViewModel(
-            model: SearchShopsModel(provider: provider)
-        )
-        return viewModel
-    }()
+    private let viewModel: SearchShopsViewModelType
 
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -38,6 +31,15 @@ final class SearchShopsViewController: UIViewController {
         return searchBar
     }()
 
+    init(viewModel: SearchShopsViewModelType) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -50,32 +52,20 @@ final class SearchShopsViewController: UIViewController {
             .disposed(by: disposeBag)
 
         let searchBarText = searchBar.rx.textDidEndEditing
-            .withLatestFrom(searchBar.rx.text.orEmpty.asObservable())
+            .withLatestFrom(searchBar.rx.text.orEmpty)
             .distinctUntilChanged()
-            .filter { !$0.isEmpty }
             .asDriver(onErrorJustReturn: "")
 
         searchBarText
-            .drive(onNext: { [searchBar] _ in
-                searchBar.text = ""
-            })
+            .asObservable()
+            .map { _ in "" }
+            .bind(to: searchBar.rx.text)
             .disposed(by: disposeBag)
 
-        // NOTE: 普通に文字が流れてきた時
         searchBarText
-            .filter { $0.count < 50 }
             .drive(onNext: { [weak self] text in
                 guard let self = self else { return }
-                self.viewModel.inputs.keyword.onNext(text)
-            })
-            .disposed(by: disposeBag)
-
-        // NOTE: 50文字以上
-        searchBarText
-            .filter { $0.count > 50 }
-            .drive(onNext: { [weak self] _ in
-                guard let self = self else { return }
-                self.view.addSubview(SearchShopsAlertModal())
+                self.viewModel.inputs.searchWord.onNext(text)
             })
             .disposed(by: disposeBag)
 
@@ -95,8 +85,15 @@ final class SearchShopsViewController: UIViewController {
             .disposed(by: disposeBag)
 
         viewModel.outputs.loading
-            .drive(onNext: { result in
-                result ? HUD.show(.progress) : HUD.hide()
+            .drive(onNext: { isProgress in
+                isProgress ? HUD.show(.progress) : HUD.hide()
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.outputs.hasSearchWordCountExceededError
+            .drive(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                self.view.addSubview(SearchShopsAlertModal())
             })
             .disposed(by: disposeBag)
 
