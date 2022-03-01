@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Moya
 
 final class TabBarController: UITabBarController {
 
@@ -21,7 +22,15 @@ final class TabBarController: UITabBarController {
     
     private func configureViewControllers() {
         var viewControllers: [UIViewController] = []
-        let searchShopsVC = SearchShopsViewController()
+        let viewModel: SearchShopsViewModel = {
+            let provider = MoyaProvider<MultiTarget>()
+            let repository = SearchShopsRepository(provider: provider)
+            let viewModel = SearchShopsViewModel(
+                model: SearchShopsModel(searchShopsRepository: repository)
+            )
+            return viewModel
+        }()
+        let searchShopsVC = SearchShopsViewController(viewModel: viewModel)
         let searchShopsVCWithNavigationController = NavigationController(rootViewController: searchShopsVC)
         searchShopsVC.tabBarItem = UITabBarItem(
             title: "リスト",
