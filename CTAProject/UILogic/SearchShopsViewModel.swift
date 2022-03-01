@@ -12,13 +12,14 @@ import RxSwift
 
 // NOTE: 外部から受ける命令
 protocol SearchShopsViewModelInputs {
-    var keyword: AnyObserver<String> { get }
+    var searchWord: AnyObserver<String> { get }
 }
 
 // NOTE: 外部に渡す値
 protocol SearchShopsViewModelOutputs: SearchShops {
     var shops: Driver<Shops> { get }
     var loading: Driver<Bool> { get }
+    var hasSearchWordCountExceededError: Driver<Bool> { get }
 }
 
 protocol SearchShopsViewModelType {
@@ -28,34 +29,48 @@ protocol SearchShopsViewModelType {
 
 final class SearchShopsViewModel: SearchShopsViewModelInputs, SearchShopsViewModelOutputs {
 
-    var keyword: AnyObserver<String>
+    var searchWord: AnyObserver<String>
     var shops: Driver<Shops>
     var loading: Driver<Bool>
+    var hasSearchWordCountExceededError: Driver<Bool>
 
     private var disposeBag = DisposeBag()
 
     init(model: SearchShopsModelType) {
-        let _keyword = PublishRelay<String>()
+        let _searchWord = PublishRelay<String>()
         let _shops = BehaviorRelay<Shops>(value: [])
         let _loading = PublishRelay<Bool>()
+        let _hasSearchWordCountExceededError = PublishRelay<Bool>()
 
-        keyword = AnyObserver<String> { event in
+        searchWord = AnyObserver<String> { event in
             guard let keyword = event.element else { return }
-            _keyword.accept(keyword)
+            _searchWord.accept(keyword)
         }
         shops = _shops.asDriver()
         loading = _loading.asDriver(onErrorJustReturn: false)
+        hasSearchWordCountExceededError = _hasSearchWordCountExceededError.asDriver(onErrorDriveWith: .empty())
 
-        let searchResult = _keyword.flatMap { keyword -> Observable<Shops> in
-            _loading.accept(true)
-            return model.fetchShops(keyword: keyword)
+        let searchWordValidationResult = _searchWord.flatMap { searchWord -> Observable<SearchWordValidator.ValidationResult> in
+            return .just(SearchWordValidator.validate(searchWord))
         }
+        .share()
+
+        searchWordValidationResult
+            .filterExceededWordCount()
+            .bind(to: _hasSearchWordCountExceededError)
+            .disposed(by: disposeBag)
+
+        let searchResult = searchWordValidationResult
+            .filterValid()
+            .flatMap { searchWord -> Single<Shops> in
+                _loading.accept(true)
+                return model.fetchShops(keyword: searchWord)
+            }
             .share()
 
         searchResult
-            .subscribe(onNext: { _ in
-                _loading.accept(false)
-            })
+            .map { _ -> Bool in false }
+            .bind(to: _loading)
             .disposed(by: disposeBag)
 
         searchResult
@@ -68,4 +83,47 @@ final class SearchShopsViewModel: SearchShopsViewModelInputs, SearchShopsViewMod
 extension SearchShopsViewModel: SearchShopsViewModelType {
     var inputs: SearchShopsViewModelInputs { return self }
     var outputs: SearchShopsViewModelOutputs { return self }
+}
+
+
+extension SearchShopsViewModel {
+    class SearchWordValidator {
+        enum ValidationResult {
+            case valid(searchWord: String)
+            case exceededWordCount
+
+        }
+
+        static func validate(_ searchWord: String) -> ValidationResult {
+            if searchWord.count > 50 {
+                return .exceededWordCount
+            }
+            return .valid(searchWord: searchWord)
+        }
+    }
+}
+
+extension ObservableType where Element == SearchShopsViewModel.SearchWordValidator.ValidationResult {
+    func filterValid() -> Observable<String> {
+        flatMap { element -> Observable<String> in
+            switch element {
+            case .valid(let searchWord):
+                return .just(searchWord)
+            default:
+                return .empty()
+            }
+        }
+    }
+
+    func filterExceededWordCount() -> Observable<Bool> {
+        flatMap { element -> Observable<Bool> in
+            switch element {
+            case .exceededWordCount:
+                return .just(true)
+            default:
+                return .empty()
+            }
+        }
+    }
+
 }
