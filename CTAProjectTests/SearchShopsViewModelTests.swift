@@ -25,7 +25,6 @@ class SearchShopsViewModelTests: XCTestCase {
         let loading = WatchStream(dependency.testTarget.outputs.loading.asObservable())
 
         dependency.testTarget.inputs.searchWord.onNext("searchQuery")
-        dependency.testScheduler.start()
 
         let shopResult = shops.observer.events.map { $0.value.element }
         let loadingResult = loading.observer.events.map { $0.value.element }
@@ -43,7 +42,6 @@ class SearchShopsViewModelTests: XCTestCase {
         let hasSearchWordCountExceededError = WatchStream(dependency.testTarget.outputs.hasSearchWordCountExceededError.asObservable())
 
         dependency.testTarget.inputs.searchWord.onNext(SearchShopsViewModelTests.invalidSearchWord)
-        dependency.testScheduler.start()
 
         let shopResult = shops.observer.events.map { $0.value.element }
         let loadingResult = loading.observer.events.map { $0.value.element }
@@ -71,7 +69,7 @@ extension SearchShopsViewModelTests {
 
 extension SearchShopsViewModelTests: SearchShops {
     typealias Budget = HotPepperAPI.Budget
-    static var invalidSearchWord = "テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト"
+    static var invalidSearchWord = String(repeating: "テキスト", count: 15)
     static var expectedData: Shops {
         return [
             Shop(
