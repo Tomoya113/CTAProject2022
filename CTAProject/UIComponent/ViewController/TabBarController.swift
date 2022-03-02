@@ -33,7 +33,7 @@ final class TabBarController: UITabBarController {
         let searchShopsVC = SearchShopsViewController(viewModel: viewModel)
         let searchShopsVCWithNavigationController = NavigationController(rootViewController: searchShopsVC)
         searchShopsVC.tabBarItem = UITabBarItem(
-            title: "リスト",
+            title: L10n.searchShopsTabTitle,
             image: UIImage(systemName: "list.bullet"),
             tag: 0
         )
