@@ -18,7 +18,6 @@ class SearchShopsModelTests: XCTestCase {
     func test_fetchShops() throws {
         let dependency = Dependency()
         let fetchShops = WatchStream(dependency.testTarget.fetchShops(keyword: "dummy").asObservable())
-        dependency.testScheduler.start()
         // NOTE: WatchStreamのvalueを使うとcompletedが返ってきてしまうのでeventsをmapしています
         let fetchShopsResult = fetchShops.observer.events.map { $0.value.element }
         XCTAssertEqual(fetchShopsResult.first??.first?.name, "もつ鍋 焼き肉 岩見 西新店")
