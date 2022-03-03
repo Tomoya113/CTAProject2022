@@ -21,7 +21,7 @@ extension HotPepperAPI {
             }
             
             var path: String {
-                return "/hotpepper/gourment/v1/"
+                return "/hotpepper/gourmet/v1/"
             }
             
             var method: Moya.Method {

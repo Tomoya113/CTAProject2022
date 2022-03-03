@@ -14,6 +14,8 @@ target 'CTAProject' do
 	pod 'RxCocoa'
 	pod 'Moya'
 	pod 'Moya/RxSwift'
+	pod 'PKHUD'
+	pod 'Nuke'
 
 
   target 'CTAProjectTests' do
