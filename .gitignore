@@ -29,3 +29,6 @@ Thumbs.db
 vendor/bundle
 *.generated.swift
 /Pods/
+
+Environments.swift
+
