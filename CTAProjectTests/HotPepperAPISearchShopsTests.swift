@@ -5,10 +5,10 @@
 //  Created by Tomoya Tanaka on 2022/01/22.
 //
 
-import XCTest
 @testable import CTAProject
 @testable import Moya
 @testable import RxSwift
+import XCTest
 
 class HotPepperAPISearchShopsTests: XCTestCase {
     static let keyword = "焼き肉"
@@ -51,7 +51,7 @@ class HotPepperAPISearchShopsTests: XCTestCase {
             return Self.generateEndpointClosure(
                 target: target,
                 sampleResponse: .response(
-                    Self.httpURLResponse(target: target, statusCode: 3000),
+                    Self.httpURLResponse(target: target, statusCode: 3_000),
                     ErrorModel.exampleJSON.data(using: .utf8)!
                 )
             )
@@ -63,14 +63,14 @@ class HotPepperAPISearchShopsTests: XCTestCase {
                 onSuccess: { result in
                     switch result {
                     case .statusCodeIsNot2XX(let response):
-                        XCTAssertEqual(response.results.error[0].code, 3000)
+                        XCTAssertEqual(response.results.error[0].code, 3_000)
                         XCTAssertEqual(response.results.error[0].message, "少なくとも１つの条件を入れてください。")
                     default:
-                        XCTFail()
+                        XCTFail("Unexpected result")
                     }
                 },
                 onFailure: { error in
-                    XCTFail()
+                    XCTFail("API Request Failed")
                 }).disposed(by: disposeBag)
     }
     
@@ -89,11 +89,11 @@ class HotPepperAPISearchShopsTests: XCTestCase {
                     case .moyaError(let moyaError):
                         XCTAssertEqual(moyaError.localizedDescription, "操作を完了できませんでした。（networkErrorエラー300）")
                     default:
-                        XCTFail()
+                        XCTFail("Unexpected error occured")
                     }
                 },
                 onFailure: { error in
-                    XCTFail()
+                    XCTFail("API request failed")
                 }).disposed(by: disposeBag)
     }
 }

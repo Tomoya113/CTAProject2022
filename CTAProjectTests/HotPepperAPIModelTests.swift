@@ -5,11 +5,11 @@
 //  Created by Tomoya Tanaka on 2022/01/22.
 //
 
-import XCTest
-import Foundation
 @testable import CTAProject
+import Foundation
 @testable import Moya
 @testable import RxSwift
+import XCTest
 
 class HotPepperAPIModelTests: XCTestCase {
     

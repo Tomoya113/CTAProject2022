@@ -73,7 +73,7 @@ final class SearchShopsTableViewCell: UITableViewCell {
     }
 }
 
-//MARK: UI Configuration
+// MARK: UI Configuration
 extension SearchShopsTableViewCell {
     private func setupView() {
         addSubview(containerStackView)
@@ -97,7 +97,7 @@ extension SearchShopsTableViewCell {
     }
 }
 
-//MARK: AutoLayout Configuration
+// MARK: AutoLayout Configuration
 extension SearchShopsTableViewCell {
     private func makeConstraints() {
         containerStackView.snp.makeConstraints { make in

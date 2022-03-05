@@ -20,6 +20,8 @@ public typealias AssetColorTypeAlias = ColorAsset.Color
 // swiftlint:disable identifier_name line_length nesting type_body_length type_name
 public enum Asset {
   public static let accentColor = ColorAsset(name: "AccentColor")
+  public static let baseBackgroundColor = ColorAsset(name: "baseBackgroundColor")
+  public static let modalOverlay = ColorAsset(name: "modalOverlay")
 }
 // swiftlint:enable identifier_name line_length nesting type_body_length type_name
 
