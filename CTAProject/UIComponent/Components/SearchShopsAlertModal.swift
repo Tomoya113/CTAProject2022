@@ -5,9 +5,9 @@
 //  Created by Tomoya Tanaka on 2022/01/28.
 //
 
-import UIKit
-import SnapKit
 import RxSwift
+import SnapKit
+import UIKit
 
 final class SearchShopsAlertModal: UIView {
     
@@ -26,10 +26,10 @@ final class SearchShopsAlertModal: UIView {
         label.numberOfLines = Const.TitleLabel.numberOfLines
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.5
-        return  label
+        return label
     }()
     
-    private let closeButton: UIButton = {
+    lazy var closeButton: UIButton = {
         let button = UIButton()
         button.setTitle(L10n.searchShopsCloseButtonTitle, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: Const.CloseButton.fontSize)
@@ -60,7 +60,7 @@ final class SearchShopsAlertModal: UIView {
     
 }
 
-//MARK: Constants
+// MARK: Constants
 extension SearchShopsAlertModal {
     enum Const {
         enum ContainerView {
@@ -86,7 +86,7 @@ extension SearchShopsAlertModal {
     }
 }
 
-//MARK: UI Configuration
+// MARK: UI Configuration
 extension SearchShopsAlertModal {
     private func setupView() {
         backgroundColor = Asset.modalOverlay.color
@@ -96,7 +96,7 @@ extension SearchShopsAlertModal {
     }
 }
 
-//MARK: AutoLayout Configuration
+// MARK: AutoLayout Configuration
 extension SearchShopsAlertModal {
     private func makeConstraints() {
         snp.makeConstraints { make in

@@ -5,8 +5,8 @@
 //  Created by Tomoya Tanaka on 2022/01/20.
 //
 
-import UIKit
-import Moya
 import Foundation
+import Moya
+import UIKit
 
 final class HotPepperAPI {}

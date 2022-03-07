@@ -106,7 +106,7 @@ final class SearchShopsViewController: UIViewController {
 
 }
 
-//MARK: Constants
+// MARK: Constants
 extension SearchShopsViewController {
     enum Const {
         enum SearchBar {

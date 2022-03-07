@@ -42,6 +42,7 @@ included:
     - ./CTAProjectTests
 excluded:
     - ./CTAProject/UIResource/Generated
+    - ./CTAProject/Generated
     - ./CTAProjectTests/SwiftLintFrameworkTests/Resources
 opt_in_rules:
     - empty_string

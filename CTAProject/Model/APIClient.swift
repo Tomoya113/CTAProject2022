@@ -18,7 +18,7 @@ final class APIClient: APIClientProtocol {
     static let shared = APIClient()
     private init() {}
     
-    func send<Request: BaseTargetType>(provider: MoyaProvider<MultiTarget> = MoyaProvider<MultiTarget>(),_ request: Request) -> Single<APIResult<Request.Response, Request.ErrorResponse>> {
+    func send<Request: BaseTargetType>(provider: MoyaProvider<MultiTarget> = MoyaProvider<MultiTarget>(), _ request: Request) -> Single<APIResult<Request.Response, Request.ErrorResponse>> {
         return provider.rx.request(MultiTarget(request))
             .map { result in
                 guard (200...299).contains(result.statusCode) else {
@@ -37,7 +37,7 @@ final class APIClient: APIClientProtocol {
     }
 }
 
-//MARK: Decoder
+// MARK: Decoder
 extension APIClient {
     static var decoder: JSONDecoder {
         let decoder = JSONDecoder()

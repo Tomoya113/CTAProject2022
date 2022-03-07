@@ -5,8 +5,8 @@
 //  Created by Tomoya Tanaka on 2022/01/12.
 //
 
-import UIKit
 import Moya
+import UIKit
 
 final class TabBarController: UITabBarController {
 
