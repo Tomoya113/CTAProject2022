@@ -8,6 +8,7 @@
 import Moya
 import PKHUD
 import RxCocoa
+import RxDataSources
 import RxSwift
 import SnapKit
 import UIKit
@@ -44,6 +45,19 @@ final class SearchShopsViewController: UIViewController {
         super.viewDidLoad()
         setupView()
 
+        let dataSource = RxTableViewSectionedReloadDataSource<SearchShopsTableViewSection>(
+            configureCell: { dataSource, tableView, indexPath, item in
+                let cell = tableView.dequeueReusableCell(withIdentifier: SearchShopsTableViewCell.reuseIdentifier, for: indexPath)
+
+                guard let cell = cell as? SearchShopsTableViewCell else {
+                    fatalError("SearchShopsTableViewCell is not configured properly")
+                }
+
+                cell.configureCell(item)
+                return cell
+            }
+        )
+
         searchBar.rx.searchButtonClicked
             .subscribe(onNext: { [searchBar] _ in
                 searchBar.resignFirstResponder()
@@ -71,17 +85,20 @@ final class SearchShopsViewController: UIViewController {
 
         viewModel.outputs.shops
             .asObservable()
-            .bind(to: tableView.rx.items(
-                cellIdentifier: SearchShopsTableViewCell.reuseIdentifier,
-                cellType: SearchShopsTableViewCell.self)
-            ) { index, shop, cell in
-                cell.configureCell(
-                    shopName: shop.name,
-                    locationName: shop.stationName,
-                    price: shop.budget.name,
-                    shopImageURL: shop.logoImage
-                )
+            .map { (shops: [HotPepperAPI.Shop]) -> [SearchShopsTableViewSection] in
+                let items = shops.map { shop -> SearchShopsTableViewCellData in
+                    // NOTE: 本来ViewModelに書く内容ですが、変更範囲が大きくなってしまうので一旦ここに書いています。
+                    return SearchShopsTableViewCellData(
+                        shopName: shop.name,
+                        locationName: shop.stationName,
+                        price: shop.budget.name,
+                        shopImageURL: shop.logoImage,
+                        favorited: false)
+                }
+                let sections = [SearchShopsTableViewSection(items: items)]
+                return sections
             }
+            .bind(to: tableView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
 
         viewModel.outputs.loading
