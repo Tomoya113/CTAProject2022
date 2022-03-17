@@ -46,15 +46,25 @@ final class SearchShopsViewController: UIViewController {
         setupView()
 
         let dataSource = RxTableViewSectionedReloadDataSource<SearchShopsTableViewSection>(
-            configureCell: { dataSource, tableView, indexPath, item in
+            configureCell: { [disposeBag] dataSource, tableView, indexPath, item in
                 let cell = tableView.dequeueReusableCell(withIdentifier: SearchShopsTableViewCell.reuseIdentifier, for: indexPath)
 
                 guard let cell = cell as? SearchShopsTableViewCell else {
                     fatalError("SearchShopsTableViewCell is not configured properly")
                 }
 
-                cell.configureCell(item)
+                Observable.just(item)
+                    .bind(to: cell.rx.bindCellData)
+                    .disposed(by: disposeBag)
+
+                // TODO: 次のPRでcellのボタンとViewModelをバインドする
+                cell.didTapFavoriteButton.emit(onNext: { _ in
+                    print("emit")
+                })
+                .disposed(by: cell.disposeBag)
+
                 return cell
+
             }
         )
 
@@ -93,7 +103,8 @@ final class SearchShopsViewController: UIViewController {
                         locationName: shop.stationName,
                         price: shop.budget.name,
                         shopImageURL: shop.logoImage,
-                        favorited: false)
+                        favorited: true
+                    )
                 }
                 let sections = [SearchShopsTableViewSection(items: items)]
                 return sections
