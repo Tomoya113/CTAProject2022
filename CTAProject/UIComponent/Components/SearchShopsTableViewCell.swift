@@ -13,12 +13,10 @@ import SnapKit
 import UIKit
 
 final class SearchShopsTableViewCell: UITableViewCell {
-    let disposeBag = DisposeBag()
-    fileprivate var favorited = false {
-        didSet {
-            handleFavoriteButtonAppearance()
-        }
+    var didTapFavoriteButton: Signal<Void> {
+        favoriteButton.rx.tap.asSignal()
     }
+    var disposeBag = DisposeBag()
 
     private let shopImageView: UIImageView = {
         let imageView = UIImageView()
@@ -70,16 +68,12 @@ final class SearchShopsTableViewCell: UITableViewCell {
 
     lazy var favoriteButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "star"), for: .normal)
+        button.setImage(UIImage(systemName: L10n.systemStar), for: .normal)
         return button
     }()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        favoriteButton.rx.tap
-            .asSignal()
-            .emit(to: rx.didPressFavoriteButton)
-            .disposed(by: disposeBag)
         setupView()
     }
 
@@ -87,9 +81,18 @@ final class SearchShopsTableViewCell: UITableViewCell {
         super.layoutSubviews()
         makeConstraints()
     }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        refreshDisposeBag()
+    }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    private func refreshDisposeBag() {
+        disposeBag = DisposeBag()
     }
 }
 
@@ -106,21 +109,21 @@ extension SearchShopsTableViewCell {
         containerStackView.addArrangedSubview(favoriteButton)
     }
 
-    func configureCell(_ data: SearchShopsTableViewCellData) {
+    fileprivate func configureCell(_ data: SearchShopsTableViewCellData) {
         shopNameLabel.text = data.shopName
         locationLabel.text = data.locationName
         priceLabel.text = data.price
         Nuke.loadImage(with: data.shopImageURL, into: shopImageView)
-        favorited = data.favorited
+        handleFavoriteButtonAppearance(data.favorited)
     }
 
-    private func handleFavoriteButtonAppearance() {
+    private func handleFavoriteButtonAppearance(_ favorited: Bool) {
         if favorited {
             favoriteButton.tintColor = .systemYellow
-            favoriteButton.setImage(UIImage(systemName:"star.fill"), for: .normal)
+            favoriteButton.setImage(UIImage(systemName: L10n.systemStarFill), for: .normal)
         } else {
             favoriteButton.tintColor = .gray
-            favoriteButton.setImage(UIImage(systemName:"star"), for: .normal)
+            favoriteButton.setImage(UIImage(systemName: L10n.systemStar), for: .normal)
         }
     }
 }
@@ -145,9 +148,9 @@ extension SearchShopsTableViewCell {
 }
 
 extension Reactive where Base: SearchShopsTableViewCell {
-    var didPressFavoriteButton: Binder<Void> {
-        return Binder(self.base) { view, _ in
-            view.favorited.toggle()
+    var bindCellData: Binder<SearchShopsTableViewCellData> {
+        return Binder(self.base) { view, data in
+            view.configureCell(data)
         }
     }
 }
