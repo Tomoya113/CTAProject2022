@@ -1,8 +1,8 @@
 //
-//  SearchShopsTableViewCell.swift
+//  SearchShopsTableViewCellData.swift
 //  CTAProject
 //
-//  Created by Tomoya Tanaka on 2022/03/08.
+//  Created by Tomoya Tanaka on 2022/03/14.
 //
 
 import RxDataSources
