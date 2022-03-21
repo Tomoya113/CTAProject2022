@@ -4,3 +4,5 @@
 "SearchShopsAlertModalLabelText" = "文字数が50文字を超過しています。";
 "SearchShopsCloseButtonTitle" = "閉じる";
 "SearchShopsTabTitle" = "リスト";
+"SystemStar" = "star";
+"SystemStarFill" = "star.fill";

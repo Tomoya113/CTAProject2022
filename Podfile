@@ -12,6 +12,7 @@ target 'CTAProject' do
 	pod 'SnapKit', '~> 5.0.0'
 	pod 'RxSwift'
 	pod 'RxCocoa'
+	pod 'RxDataSources'
 	pod 'Moya'
 	pod 'Moya/RxSwift'
 	pod 'PKHUD'

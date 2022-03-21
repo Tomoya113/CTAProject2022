@@ -6,10 +6,18 @@
 //
 
 import Nuke
+import RxCocoa
+import RxDataSources
+import RxSwift
 import SnapKit
 import UIKit
 
 final class SearchShopsTableViewCell: UITableViewCell {
+    var didTapFavoriteButton: Signal<Void> {
+        favoriteButton.rx.tap.asSignal()
+    }
+    var disposeBag = DisposeBag()
+
     private let shopImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -54,10 +62,16 @@ final class SearchShopsTableViewCell: UITableViewCell {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.spacing = 8
-        stackView.alignment = .leading
+        stackView.alignment = .center
         return stackView
     }()
-    
+
+    lazy var favoriteButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: L10n.systemStar), for: .normal)
+        return button
+    }()
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupView()
@@ -67,35 +81,53 @@ final class SearchShopsTableViewCell: UITableViewCell {
         super.layoutSubviews()
         makeConstraints()
     }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        refreshDisposeBag()
+    }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    private func refreshDisposeBag() {
+        disposeBag = DisposeBag()
+    }
 }
+
 
 // MARK: UI Configuration
 extension SearchShopsTableViewCell {
     private func setupView() {
-        addSubview(containerStackView)
+        contentView.addSubview(containerStackView)
         labelStackView.addArrangedSubview(shopNameLabel)
         labelStackView.addArrangedSubview(priceLabel)
         labelStackView.addArrangedSubview(locationLabel)
         containerStackView.addArrangedSubview(shopImageView)
         containerStackView.addArrangedSubview(labelStackView)
+        containerStackView.addArrangedSubview(favoriteButton)
     }
 
-    func configureCell(
-        shopName: String,
-        locationName: String,
-        price: String,
-        shopImageURL: String
-    ) {
-        shopNameLabel.text = shopName
-        locationLabel.text = locationName
-        priceLabel.text = price
-        Nuke.loadImage(with: shopImageURL, into: shopImageView)
+    fileprivate func configureCell(_ data: SearchShopsTableViewCellData) {
+        shopNameLabel.text = data.shopName
+        locationLabel.text = data.locationName
+        priceLabel.text = data.price
+        Nuke.loadImage(with: data.shopImageURL, into: shopImageView)
+        handleFavoriteButtonAppearance(data.favorited)
+    }
+
+    private func handleFavoriteButtonAppearance(_ favorited: Bool) {
+        if favorited {
+            favoriteButton.tintColor = .systemYellow
+            favoriteButton.setImage(UIImage(systemName: L10n.systemStarFill), for: .normal)
+        } else {
+            favoriteButton.tintColor = .gray
+            favoriteButton.setImage(UIImage(systemName: L10n.systemStar), for: .normal)
+        }
     }
 }
+
 
 // MARK: AutoLayout Configuration
 extension SearchShopsTableViewCell {
@@ -107,6 +139,18 @@ extension SearchShopsTableViewCell {
         shopImageView.snp.makeConstraints { make in
             make.width.equalTo(144)
             make.height.equalTo(144)
+        }
+        favoriteButton.snp.makeConstraints { make in
+            make.width.equalTo(48)
+            make.height.equalTo(48)
+        }
+    }
+}
+
+extension Reactive where Base: SearchShopsTableViewCell {
+    var bindCellData: Binder<SearchShopsTableViewCellData> {
+        return Binder(self.base) { view, data in
+            view.configureCell(data)
         }
     }
 }
