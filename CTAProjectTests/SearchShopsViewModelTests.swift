@@ -17,21 +17,13 @@ class SearchShopsViewModelTests: XCTestCase {
     func test_searchWordInputSuccess() throws {
         let dependency = Dependency()
 
-        dependency.searchShopsModelMock.fetchShopsHandler = { keyword in
-            return Single.just(Self.expectedData)
-        }
-
         let shops = WatchStream(dependency.testTarget.outputs.shops.asObservable())
         let loading = WatchStream(dependency.testTarget.outputs.loading.asObservable())
 
         dependency.testTarget.inputs.searchWord.onNext("searchQuery")
 
-        let shopResult = shops.observer.events.map { $0.value.element }
-        let loadingResult = loading.observer.events.map { $0.value.element }
-
-        XCTAssertEqual(shopResult[shopResult.count - 1]?.count, Self.expectedData.count)
-        XCTAssertEqual(shopResult.last??.count, Self.expectedData.count)
-        XCTAssertEqual(loadingResult, [true, false])
+        XCTAssertEqual(shops.result.last??.count, Self.expectedData.count)
+        XCTAssertEqual(loading.result, [true, false])
     }
 
     func test_searchWordInputFailure() throws {
@@ -43,13 +35,23 @@ class SearchShopsViewModelTests: XCTestCase {
 
         dependency.testTarget.inputs.searchWord.onNext(SearchShopsViewModelTests.invalidSearchWord)
 
-        let shopResult = shops.observer.events.map { $0.value.element }
-        let loadingResult = loading.observer.events.map { $0.value.element }
-        let hasSearchWordCountExceededErrorResult = hasSearchWordCountExceededError.observer.events.map { $0.value.element }
+        XCTAssertEqual(shops.result.count, 1)
+        XCTAssertTrue(loading.result.isEmpty)
+        XCTAssertEqual(hasSearchWordCountExceededError.result, [true])
+    }
 
-        XCTAssertEqual(shopResult.count, 1)
-        XCTAssertTrue(loadingResult.isEmpty)
-        XCTAssertEqual(hasSearchWordCountExceededErrorResult, [true])
+    func test_tapFavoriteButton() throws {
+        let dependency = Dependency()
+
+        let shops = WatchStream(dependency.testTarget.outputs.shops.asObservable())
+        let didPressFavoriteButton = WatchStream(dependency.testTarget.outputs.didPressFavoriteButton.asObservable())
+
+        dependency.testTarget.inputs.searchWord.onNext("searchQuery")
+        dependency.testTarget.inputs.tapFavoriteButton.onNext(IndexPath(row: Self.expectedData.count - 1, section: 1))
+
+        XCTAssertEqual(shops.result.last??.last?.favorited, true)
+        XCTAssertEqual(didPressFavoriteButton.result.count, 1)
+
     }
 }
 
@@ -63,6 +65,18 @@ extension SearchShopsViewModelTests {
             testScheduler = TestScheduler(initialClock: 0)
             searchShopsModelMock = SearchShopsModelTypeMock()
             testTarget = SearchShopsViewModel(model: searchShopsModelMock)
+
+            searchShopsModelMock.fetchShopsHandler = { keyword in
+                return Single.just(SearchShopsViewModelTests.expectedData)
+            }
+
+            searchShopsModelMock.removeFavoriteShopHandler = { id in
+                return Single.just(())
+            }
+
+            searchShopsModelMock.addFavoriteShopHandler = { shop in
+                return Single.just(FavoriteShop.exampleInstance)
+            }
         }
     }
 }
@@ -70,15 +84,9 @@ extension SearchShopsViewModelTests {
 extension SearchShopsViewModelTests: SearchShops {
     typealias Budget = HotPepperAPI.Budget
     static var invalidSearchWord = String(repeating: "テキスト", count: 15)
-    static var expectedData: Shops {
+    static var expectedData: [SearchShopsTableViewCellData] {
         return [
-            Shop(
-                stationName: "西新",
-                name: "もつ鍋 焼き肉 岩見 西新店",
-                budget: Budget(name: "3001～4000円"),
-                logoImage: "https://imgfp.hotp.jp/IMGH/93/76/P035429376/P035429376_69.jpg"
-            ),
+            SearchShopsTableViewCellData.exampleInstance
         ]
     }
 }
-
