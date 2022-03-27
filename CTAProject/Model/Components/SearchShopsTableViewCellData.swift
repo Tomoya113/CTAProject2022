@@ -12,11 +12,12 @@ typealias SearchShopsTableViewCellData = SearchShopsTableViewCell.SearchShopsTab
 
 extension SearchShopsTableViewCell {
     struct SearchShopsTableViewCellData {
+        let id: String
         let shopName: String
         let locationName: String
         let price: String
         let shopImageURL: String
-        let favorited: Bool
+        var favorited: Bool
     }
 
     struct SearchShopsTableViewSection {
@@ -30,5 +31,18 @@ extension SearchShopsTableViewSection: SectionModelType {
     init (original: Self, items: [Item]) {
         self = original
         self.items = items
+    }
+}
+
+extension SearchShopsTableViewCellData {
+    static var exampleInstance: SearchShopsTableViewCellData {
+        return SearchShopsTableViewCellData(
+            id: "id",
+            shopName: "shopName",
+            locationName: "locationName",
+            price: "price",
+            shopImageURL: "shopImageURL",
+            favorited: false
+        )
     }
 }

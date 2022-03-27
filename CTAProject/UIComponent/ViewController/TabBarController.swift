@@ -6,6 +6,7 @@
 //
 
 import Moya
+import RealmSwift
 import UIKit
 
 final class TabBarController: UITabBarController {
@@ -24,9 +25,13 @@ final class TabBarController: UITabBarController {
         var viewControllers: [UIViewController] = []
         let viewModel: SearchShopsViewModel = {
             let provider = MoyaProvider<MultiTarget>()
-            let repository = SearchShopsRepository(provider: provider)
+            let searchShopsRepository = SearchShopsRepository(provider: provider)
+            let favoritedShopsRepository = FavoritedShopsRepository(realm: try! Realm())
             let viewModel = SearchShopsViewModel(
-                model: SearchShopsModel(searchShopsRepository: repository)
+                model: SearchShopsModel(
+                    searchShopsRepository: searchShopsRepository,
+                    favoritedShopsRepository: favoritedShopsRepository
+                )
             )
             return viewModel
         }()

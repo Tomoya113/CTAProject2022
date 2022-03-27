@@ -45,29 +45,6 @@ final class SearchShopsViewController: UIViewController {
         super.viewDidLoad()
         setupView()
 
-        let dataSource = RxTableViewSectionedReloadDataSource<SearchShopsTableViewSection>(
-            configureCell: { [disposeBag] dataSource, tableView, indexPath, item in
-                let cell = tableView.dequeueReusableCell(withIdentifier: SearchShopsTableViewCell.reuseIdentifier, for: indexPath)
-
-                guard let cell = cell as? SearchShopsTableViewCell else {
-                    fatalError("SearchShopsTableViewCell is not configured properly")
-                }
-
-                Observable.just(item)
-                    .bind(to: cell.rx.bindCellData)
-                    .disposed(by: disposeBag)
-
-                // TODO: 次のPRでcellのボタンとViewModelをバインドする
-                cell.didTapFavoriteButton.emit(onNext: { _ in
-                    print("emit")
-                })
-                .disposed(by: cell.disposeBag)
-
-                return cell
-
-            }
-        )
-
         searchBar.rx.searchButtonClicked
             .subscribe(onNext: { [searchBar] _ in
                 searchBar.resignFirstResponder()
@@ -93,19 +70,11 @@ final class SearchShopsViewController: UIViewController {
             })
             .disposed(by: disposeBag)
 
+        let dataSource = initializeDataSource()
+
         viewModel.outputs.shops
             .asObservable()
-            .map { (shops: [HotPepperAPI.Shop]) -> [SearchShopsTableViewSection] in
-                let items = shops.map { shop -> SearchShopsTableViewCellData in
-                    // NOTE: 本来ViewModelに書く内容ですが、変更範囲が大きくなってしまうので一旦ここに書いています。
-                    return SearchShopsTableViewCellData(
-                        shopName: shop.name,
-                        locationName: shop.stationName,
-                        price: shop.budget.name,
-                        shopImageURL: shop.logoImage,
-                        favorited: true
-                    )
-                }
+            .map { items in
                 let sections = [SearchShopsTableViewSection(items: items)]
                 return sections
             }
@@ -130,6 +99,33 @@ final class SearchShopsViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         makeConstraints()
+    }
+
+    private func initializeDataSource() -> RxTableViewSectionedReloadDataSource<SearchShopsTableViewSection> {
+        return RxTableViewSectionedReloadDataSource<SearchShopsTableViewSection>(
+            configureCell: { [viewModel] dataSource, tableView, indexPath, item in
+                let cell = tableView.dequeueReusableCell(withIdentifier: SearchShopsTableViewCell.reuseIdentifier, for: indexPath)
+
+                guard let cell = cell as? SearchShopsTableViewCell else {
+                    fatalError("SearchShopsTableViewCell is not configured properly")
+                }
+
+                Observable.just(item)
+                    .bind(to: cell.rx.bindCellData)
+                    .disposed(by: cell.disposeBag)
+
+                cell.didTapFavoriteButton
+                    .asObservable()
+                    .flatMap { _ -> Observable<IndexPath> in
+                        return Observable.just(indexPath)
+                    }
+                    .bind(to: viewModel.inputs.tapFavoriteButton)
+                    .disposed(by: cell.disposeBag)
+
+                return cell
+
+            }
+        )
     }
 
 }

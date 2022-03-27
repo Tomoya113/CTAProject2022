@@ -10,6 +10,7 @@ target 'CTAProject' do
   pod 'SwiftGen'
   pod 'Unio'
 	pod 'SnapKit', '~> 5.0.0'
+	pod 'RealmSwift'
 	pod 'RxSwift'
 	pod 'RxCocoa'
 	pod 'RxDataSources'
