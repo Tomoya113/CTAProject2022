@@ -26,4 +26,12 @@ struct WatchStream<Element> {
     var value: Element? {
         return observer.events.last.flatMap { $0.value }?.element
     }
+
+    var result: [Element?] {
+        return observer.events.map { $0.value.element }
+    }
+
+    var errors: [Error?] {
+        return observer.events.map { $0.value.error }
+    }
 }
