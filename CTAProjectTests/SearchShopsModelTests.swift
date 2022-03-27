@@ -19,8 +19,20 @@ class SearchShopsModelTests: XCTestCase {
         let dependency = Dependency()
         let fetchShops = WatchStream(dependency.testTarget.fetchShops(keyword: "dummy").asObservable())
         // NOTE: WatchStreamのvalueを使うとcompletedが返ってきてしまうのでeventsをmapしています
-        let fetchShopsResult = fetchShops.observer.events.map { $0.value.element }
-        XCTAssertEqual(fetchShopsResult.first??.first?.name, "もつ鍋 焼き肉 岩見 西新店")
+        XCTAssertEqual(fetchShops.result.first??.first?.shopName, "もつ鍋 焼き肉 岩見 西新店")
+    }
+
+    func test_addFavoriteShop() throws {
+        let dependency = Dependency()
+        let addFavoriteShop = WatchStream(dependency.testTarget.addFavoriteShop(FavoriteShop.exampleInstance).asObservable())
+        XCTAssertEqual(addFavoriteShop.result.first??.id, FavoriteShop.exampleInstance.id)
+    }
+
+    func test_removeFavoriteShop() throws {
+        let dependency = Dependency()
+        let removeFavoriteShop = WatchStream(dependency.testTarget.removeFavoriteShop(FavoriteShop.exampleInstance.id).asObservable())
+        XCTAssertEqual(removeFavoriteShop.result.count, 2)
+
     }
 }
 
@@ -43,8 +55,23 @@ extension SearchShopsModelTests {
             }
             stubbingProvider = MoyaProvider<MultiTarget>(endpointClosure: endpointClosure, stubClosure: MoyaProvider.immediatelyStub)
 
+            let favoritedShopsRepositoryMock = FavoritedShopsRepositoryTypeMock()
+            favoritedShopsRepositoryMock.checkIfShopFavoritedHandler = { string in
+                return false
+            }
+            favoritedShopsRepositoryMock.addFavoriteShopHandler = { favoriteShop in
+                return Single.just(FavoriteShop.exampleInstance)
+            }
+            favoritedShopsRepositoryMock.removeFavoriteShopHandler = { id in
+                return Single.just(())
+            }
+
+
             let searchShopsRepository = SearchShopsRepository(provider: stubbingProvider)
-            testTarget = SearchShopsModel(searchShopsRepository: searchShopsRepository)
+            testTarget = SearchShopsModel(
+                searchShopsRepository: searchShopsRepository,
+                favoritedShopsRepository: favoritedShopsRepositoryMock
+            )
         }
     }
 }
