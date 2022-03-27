@@ -13,6 +13,7 @@ extension HotPepperAPI {
     }
     
     struct Shop: Decodable {
+        let id: String
         let stationName: String
         let name: String
         let budget: Budget
