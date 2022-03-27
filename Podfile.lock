@@ -10,6 +10,11 @@ PODS:
     - RxSwift (~> 6.0)
   - Nuke (10.7.1)
   - PKHUD (5.3.0)
+  - Realm (10.24.2):
+    - Realm/Headers (= 10.24.2)
+  - Realm/Headers (10.24.2)
+  - RealmSwift (10.24.2):
+    - Realm (= 10.24.2)
   - RxBlocking (6.2.0):
     - RxSwift (= 6.2.0)
   - RxCocoa (6.2.0):
@@ -36,6 +41,7 @@ DEPENDENCIES:
   - Moya/RxSwift
   - Nuke
   - PKHUD
+  - RealmSwift
   - RxBlocking
   - RxCocoa
   - RxDataSources
@@ -53,6 +59,8 @@ SPEC REPOS:
     - Moya
     - Nuke
     - PKHUD
+    - Realm
+    - RealmSwift
     - RxBlocking
     - RxCocoa
     - RxDataSources
@@ -70,6 +78,8 @@ SPEC CHECKSUMS:
   Moya: 138f0573e53411fb3dc17016add0b748dfbd78ee
   Nuke: 279f17a599fd1c83cf51de5e0e1f2db143a287b0
   PKHUD: 98f3e4bc904b9c916f1c5bb6d765365b5357291b
+  Realm: c8421eee9ff92b16b4f91a313b5cc695c37c1921
+  RealmSwift: 10ed6fa09c36aaaff55e12afdc71802ec3ddb1c0
   RxBlocking: 0b29f7d2079109a8de49c411381bed7c33ef1eeb
   RxCocoa: 4baf94bb35f2c0ab31bc0cb9f1900155f646ba42
   RxDataSources: aa47cc1ed6c500fa0dfecac5c979b723542d79cf
@@ -81,6 +91,6 @@ SPEC CHECKSUMS:
   SwiftLint: 06ac37e4d38c7068e0935bb30cda95f093bec761
   Unio: 6e57bd33dbcf38d281b0b420f75c0eae3bef0cf3
 
-PODFILE CHECKSUM: c4900022ccc5645af90a58bee72b947393e45938
+PODFILE CHECKSUM: 629c3b275a47afef0ab4a3ae203f797480f60f2f
 
 COCOAPODS: 1.11.2
